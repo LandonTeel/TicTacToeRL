@@ -1,29 +1,24 @@
 import pygame
 import numpy as np
 
-# Constants
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 600
 LINE_WIDTH = 5
 
-# Pygame Setup
 pygame.init()
 clock = pygame.time.Clock()
 font = pygame.font.Font('Cascadia.ttf', 12)
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption("TicTacToeRL")
 
-# Utility Functions
 def to_screen_coords(point, scale):
     return (int(SCREEN_WIDTH / 2 + scale * point[0]), int(SCREEN_HEIGHT / 2 + scale * point[1]))
 
 def draw_grid(screen, scale):
-    # Horizontal lines
     pygame.draw.line(screen, BLACK, to_screen_coords([-3, 1], scale), to_screen_coords([3, 1], scale), LINE_WIDTH)
     pygame.draw.line(screen, BLACK, to_screen_coords([-3, -1], scale), to_screen_coords([3, -1], scale), LINE_WIDTH)
-    # Vertical lines
     pygame.draw.line(screen, BLACK, to_screen_coords([-1, 3], scale), to_screen_coords([-1, -3], scale), LINE_WIDTH)
     pygame.draw.line(screen, BLACK, to_screen_coords([1, 3], scale), to_screen_coords([1, -3], scale), LINE_WIDTH)
 
@@ -44,7 +39,7 @@ class TicTacToeGame:
         self.square_array = [[2 for _ in range(3)] for _ in range(3)]
         self.circles_to_draw = []
         self.xs_to_draw = []
-        self.state = 1  # 0 = O's turn, 1 = X's turn
+        self.state = 1  # 0 = O; 1 = X
         self.winner = None
         self.winning_line = None
 
@@ -76,14 +71,14 @@ class TicTacToeGame:
 
     def check_win(self):
         lines = [
-            [(0, 0), (0, 1), (0, 2)],  # Top row
-            [(1, 0), (1, 1), (1, 2)],  # Middle row
-            [(2, 0), (2, 1), (2, 2)],  # Bottom row
-            [(0, 0), (1, 0), (2, 0)],  # Left column
-            [(0, 1), (1, 1), (2, 1)],  # Middle column
-            [(0, 2), (1, 2), (2, 2)],  # Right column
-            [(0, 0), (1, 1), (2, 2)],  # Diagonal top-left to bottom-right
-            [(0, 2), (1, 1), (2, 0)],  # Diagonal top-right to bottom-left
+            [(0, 0), (0, 1), (0, 2)],  # top row
+            [(1, 0), (1, 1), (1, 2)],  # middle row
+            [(2, 0), (2, 1), (2, 2)],  # bottom row
+            [(0, 0), (1, 0), (2, 0)],  # left col
+            [(0, 1), (1, 1), (2, 1)],  # middle col
+            [(0, 2), (1, 2), (2, 2)],  # right col
+            [(0, 0), (1, 1), (2, 2)],  # diag tl br
+            [(0, 2), (1, 1), (2, 0)],  # diag tr bl
         ]
 
         for line in lines:
@@ -113,7 +108,7 @@ class TicTacToeGame:
             return
         
         if self.winner:
-            return  # Ignore further moves if the game is over
+            return  # stop moves from happening when game won
 
         for i, row in enumerate(self.boxes):
             for j, box in enumerate(row):
@@ -126,7 +121,7 @@ class TicTacToeGame:
                         self.square_array[i][j] = 1
                     self.state = 1 - self.state
                     if self.check_win():
-                        self.render()  # Show the winning line
+                        self.render()
                     return
 
 def main():
