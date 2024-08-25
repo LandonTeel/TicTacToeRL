@@ -24,5 +24,5 @@ def main():
         screen.fill(WHITE)
 
         pygame.display.update()
-
-main()
+if __name__ == "__main__":
+    main()
