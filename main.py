@@ -12,7 +12,7 @@ class Node:
     
 # class Tree:
 parents = []
-# WE are 0 and THEY are 1
+# we are 0 and they are 1
 def minimax_helper(current_state: list[list[int]], parent: Node, turn=0) -> tuple[list[list[int]], Node, int]:
     visited = []
     nodes = []
@@ -26,7 +26,7 @@ def minimax_helper(current_state: list[list[int]], parent: Node, turn=0) -> tupl
                 visited.append((i, j))
                 nodes.append(currentNode)
 
-    parent.children = visited
+    parent.children = nodes
 
     parents.append(parent)
 
@@ -53,6 +53,9 @@ def minimax(state: list[list[int]]) -> list[int]:
 def main():
     state = [[-1 for j in range(3)] for i in range(3)]
     minimax(state)
+    for p in parents:
+        for c in p.children:
+            print(c.data)
 
 
 if __name__ == "__main__":
