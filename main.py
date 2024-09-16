@@ -2,61 +2,102 @@
 
 # torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
+
+import math
+
 P1, P2 = 0, 1
 
-class Node:
-    def __init__(self, data: list[list[int]], parent: "Node", children=[]) -> None:
-        self.children = children
-        self.data = data
-        self.parent = parent
-    
-# class Tree:
-parents = []
-# we are 0 and they are 1
-def minimax_helper(current_state: list[list[int]], parent: Node, turn=0) -> tuple[list[list[int]], Node, int]:
-    visited = []
-    nodes = []
-    for i in range(len(current_state)):
-        for j in range(len(current_state[0])):
-            if current_state[i][j] == -1 and (i, j) not in visited:
-                currentNode = Node(current_state, parent)
-                new_state = current_state
-                new_state[i][j] = turn
-                minimax_helper(new_state, currentNode, turn^1)
-                visited.append((i, j))
-                nodes.append(currentNode)
+def is_winner(board: list[list[int]], player: int) -> bool:
+    for row in board:
+        if all(cell == player for cell in row):
+            return True
+    for col in range(3):
+        if all(board[row][col] == player for row in range(3)):
+            return True
+    if all(board[i][i] == player for i in range(3)) or all(board[i][2 - i] == player for i in range(3)):
+        return True
+    return False
 
-    parent.children = nodes
+def get_empty_positions(board: list[list[int]]) -> list[tuple[int, int]]:
+    return [(i, j) for i in range(3) for j in range(3) if board[i][j] == -1]
 
-    parents.append(parent)
+def minimax_helper(current_state: list[list[int]], turn: int) -> tuple[int, tuple[int, int]]:
+    if is_winner(current_state, P1):
+        return 1, None
+    if is_winner(current_state, P2):
+        return -1, None
+    if not get_empty_positions(current_state):
+        return 0, None
 
-    return list(), Node(list, None), 0
+    best_score = -math.inf if turn == P1 else math.inf
+    best_move = None
 
+    for i, j in get_empty_positions(current_state):
+        new_state = [row[:] for row in current_state]
+        new_state[i][j] = turn
+        score, _ = minimax_helper(new_state, 1 - turn)
 
-def dfs(graph, start, visited=None):
-    if visited is None:
-        visited = set()
-    visited.add(start)
+        if turn == P1:
+            if score > best_score:
+                best_score = score
+                best_move = (i, j)
+        else:
+            if score < best_score:
+                best_score = score
+                best_move = (i, j)
 
-    print(start)
+    return best_score, best_move
 
-    for next in graph[start] - visited:
-        dfs(graph, next, visited)
-    return visited
+def minimax(state: list[list[int]]) -> tuple[int, tuple[int, int]]:
+    score, best_move = minimax_helper(state, P2) 
+    return score, best_move
 
-
-def minimax(state: list[list[int]]) -> list[int]:
-    head = Node(None, None)
-    res = minimax_helper(state, head)
-
+def print_board(board: list[list[int]]):
+    players = ["O", "X", " "]
+    for row in board:
+        print(" | ".join(players[cell] for cell in row))
+        print("---------")
 
 def main():
-    state = [[-1 for j in range(3)] for i in range(3)]
-    minimax(state)
-    for p in parents:
-        for c in p.children:
-            print(c.data)
+    state = [[-1 for _ in range(3)] for _ in range(3)]
+    current_player = P1 
 
+    while True:
+        print("current state:")
+        print_board(state)
+        
+        if current_player == P1:
+            while True:
+                try:
+                    row = int(input("Enter row (0-2): "))
+                    col = int(input("Enter column (0-2): "))
+                    if state[row][col] == -1:
+                        state[row][col] = P1
+                        break
+                    else:
+                        print("cell taken")
+                except (ValueError, IndexError):
+                    print("invalid input")
+        else:
+            _, move = minimax(state)
+            if move is not None:
+                row, col = move
+                state[row][col] = P2
+
+        if is_winner(state, P1):
+            print("\nO wins\n")
+            break
+        if is_winner(state, P2):
+            print("\nX wins\n")
+            break
+        if not get_empty_positions(state):
+            print("\ndraw\n")
+            break
+        
+        current_player = 1 - current_player
+
+    print_board(state)
 
 if __name__ == "__main__":
     main()
+
