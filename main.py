@@ -1,11 +1,5 @@
-# import torch  
-
-# torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
-
+from minimax import P1, P2
 import math
-
-P1, P2 = 0, 1
 
 def is_winner(board: list[list[int]], player: int) -> bool:
     for row in board:

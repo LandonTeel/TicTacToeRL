@@ -1,12 +1,10 @@
-from minimax import minimax_algorithm, get_empty_positions
+from minimax import minimax_algorithm, get_empty_positions, P1, P2
 from pathlib import Path
 import random
 
 # TODO: current dataset has too many duplicates
 
 PATH = Path("./data/dataset.txt")
-
-P1, P2 = 0, 1
 
 def generate_dataset(sample_size=100, early_game_bias=False) -> list[tuple[list[list[int]], tuple[int, int]]]:
     data = []
