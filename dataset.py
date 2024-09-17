@@ -1,10 +1,24 @@
 from minimax import minimax_algorithm, get_empty_positions, P1, P2
+from torch.utils.data import Dataset
 from pathlib import Path
 import random
+import torch
 
 # TODO: current dataset has too many duplicates
 
 PATH = Path("./data/dataset.txt")
+
+class TicTacToeDataset(Dataset):
+    def __init__(self, data) -> None:
+        self.inputs = [torch.tensor(d[0], dtype=torch.float32).flatten() for d in data]
+        self.labels = [torch.tensor(d[1], dtype=torch.long) for d in data]
+
+    def __len__(self) -> int:
+        return len(self.inputs)
+
+    def __getitem__(self, idx) -> tuple[torch.Tensor, torch.Tensor]:
+        return self.inputs[idx], self.labels[idx]
+
 
 def generate_dataset(sample_size=100, early_game_bias=False) -> list[tuple[list[list[int]], tuple[int, int]]]:
     data = []
@@ -56,7 +70,8 @@ def read_dataset() -> list[tuple[list[int], tuple[int, int]]]:
 
     return data
 
-def return_data() -> list[tuple[list[int], tuple[int, int]]]:
+
+def return_data() -> TicTacToeDataset:
     try:
         data = read_dataset()
     except Exception:
@@ -64,5 +79,9 @@ def return_data() -> list[tuple[list[int], tuple[int, int]]]:
         if "y" in inp.lower():
             data = generate_dataset(sample_size=10000)
             write_dataset(data)
+        else:
+            raise
 
-    return data
+    dataset = TicTacToeDataset(data)
+    return dataset
+

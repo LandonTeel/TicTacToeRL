@@ -1,12 +1,11 @@
-import os
 import torch
 from torch import nn
 from torch.utils.data import DataLoader
-from torchvision import datasets, transforms
+from dataset import return_data
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-class Model(nn.Model):
+class Model(nn.Module):
     def __init__(self) -> None:
         super().__init__()
         self.layers = nn.Sequential(
@@ -23,8 +22,15 @@ class Model(nn.Model):
 
 def train():
     model = Model().to(device)
+    dataset = return_data()
+    dataloader = DataLoader(dataset, batch_size=32, shuffle=True)
+    for inputs, labels in dataloader:
+        # TODO: train model
+        pass
+    
 
-
+def main():
+    pass
 
 if __name__ == "__main__":
     main()
