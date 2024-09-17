@@ -14,6 +14,30 @@ train_split_ratio = 0.9
 class SupervisedModel(nn.Module):
     def __init__(self) -> None:
         super().__init__()
+        self.fc1 = nn.Linear(9, 128)
+        self.bn1 = nn.BatchNorm1d(128)
+        self.dropout1 = nn.Dropout(0.5)
+        self.fc2 = nn.Linear(128, 128)
+        self.bn2 = nn.BatchNorm1d(128)
+        self.dropout2 = nn.Dropout(0.5)
+        self.fc3 = nn.Linear(128, 2)
+
+    def forward(self, x) -> torch.Tensor:
+        x = self.fc1(x)
+        x = self.bn1(x) 
+        x = nn.functional.leaky_relu(x, negative_slope=0.01)
+        x = self.dropout1(x)
+        x = self.fc2(x)
+        x = self.bn2(x) 
+        x = nn.functional.leaky_relu(x, negative_slope=0.01)
+        x = self.dropout2(x)
+        x = self.fc3(x)
+        return x
+
+"""
+class SupervisedModel(nn.Module):
+    def __init__(self) -> None:
+        super().__init__()
         self.layers = nn.Sequential(
             nn.Linear(9, 64),
             nn.ReLU(),
@@ -23,22 +47,25 @@ class SupervisedModel(nn.Module):
         )
 
     def forward(self, x) -> torch.Tensor:
-        out = self.layers(x)
-        return out
+        return self.layers(x)
+
+"""
 
 def train(model: SupervisedModel, dataloader: DataLoader) -> None:
     model.train()
-    loss_function = nn.CrossEntropyLoss()
+    loss_function = nn.MSELoss()
     optim = torch.optim.SGD(model.parameters(), lr=lr)
     i = 0
     for epoch in range(epochs):
         print(f"\nepoch: {epoch}\n")
         for batch_inputs, batch_labels in dataloader:
-            for idx in range(len(batch_inputs)):
-                inp, label = batch_inputs[idx].to(device).float(), batch_labels[idx].to(device).float()
+            # for idx in range(len(batch_inputs)):
+                # inp, label = batch_inputs[idx].to(device).float(), batch_labels[idx].to(device).float()
+                batch_inputs, batch_labels = batch_inputs.to(device).float(), batch_labels.to(device).float()
                 optim.zero_grad()
-                prediction = model(inp)
-                loss = loss_function(prediction, label)
+                # prediction = model(inp)
+                prediction = model(batch_inputs)
+                loss = loss_function(prediction, batch_labels)
                 loss.backward()
                 optim.step()
 
@@ -49,30 +76,31 @@ def train(model: SupervisedModel, dataloader: DataLoader) -> None:
 
 def test(model: SupervisedModel, dataloader: DataLoader) -> None:
     model.eval()
-    loss_function = nn.CrossEntropyLoss()
-    total_loss = 0
-    correct = 0
-    count = 0
+    loss_function = nn.MSELoss()
+    count, correct, total_loss = 0, 0, 0
     with torch.no_grad():
         for batch_inputs, batch_labels in dataloader:
-            for idx in range(len(batch_inputs)):
-                inp, label = batch_inputs[idx].to(device).float(), batch_labels[idx].to(device).float()
-                prediction = model(inp)
-                total_loss += loss_function(prediction, label).item()
-                row, col = prediction
-                row, col = row.item(), col.item()
-                if row < 0:
-                    row = 0
-                if row > 2:
-                    row = 2
-                if col < 0:
-                    col = 0
-                if col > 2:
-                    col = 2
-                row, col = round(row), round(col)
-                if row == label[0] and col == label[1]:
-                    correct += 1
-                count += 1
+                batch_inputs, batch_labels = batch_inputs.to(device).float(), batch_labels.to(device).float()
+
+            # for idx in range(len(batch_inputs)):
+                # inp, label = batch_inputs[idx].to(device).float(), batch_labels[idx].to(device).float()
+                prediction = model(batch_inputs)
+                total_loss += loss_function(prediction, batch_labels).item()
+                for i in range(len(prediction)):
+                    row, col = prediction[i]
+                    row, col = row.item(), col.item()
+                    if row < 0:
+                        row = 0
+                    if row > 2:
+                        row = 2
+                    if col < 0:
+                        col = 0
+                    if col > 2:
+                        col = 2
+                    row, col = round(row), round(col)
+                    if row == batch_labels[i][0] and col == batch_labels[i][1]:
+                        correct += 1
+                    count += 1
 
     average_loss = total_loss / len(dataloader.dataset)
     print(f"Average test loss: {average_loss}")
