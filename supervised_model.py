@@ -8,7 +8,7 @@ lr = 1e-3
 batch_size = 32
 epochs = 10
 
-class Model(nn.Module):
+class SupervisedModel(nn.Module):
     def __init__(self) -> None:
         super().__init__()
         self.layers = nn.Sequential(
@@ -24,7 +24,7 @@ class Model(nn.Module):
         return out
 
 def train() -> None:
-    model = Model().to(device)
+    model = SupervisedModel().to(device)
 
     dataset = return_data()
     dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
