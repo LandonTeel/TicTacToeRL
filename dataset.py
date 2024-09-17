@@ -2,12 +2,13 @@ from minimax import minimax_algorithm, get_empty_positions
 from pathlib import Path
 import random
 
+# TODO: current dataset has too many duplicates
+
 PATH = Path("./data/dataset.txt")
 
 P1, P2 = 0, 1
 
 def generate_dataset(sample_size=100, early_game_bias=False) -> list[tuple[list[list[int]], tuple[int, int]]]:
-    # some duplicate data is fine
     data = []
     i = 0
     while i < sample_size:
@@ -44,7 +45,7 @@ def write_dataset(data: list[tuple[list[list[int]], tuple[int, int]]]) -> None:
             f.write(f"{str_state}:{r}{c}\n")
 
 
-def read_dataset() -> list[tuple[list[list[int]], tuple[int, int]]]:
+def read_dataset() -> list[tuple[list[int], tuple[int, int]]]:
     data = []
     with open(PATH, "r") as f:
         for line in f:
@@ -57,12 +58,13 @@ def read_dataset() -> list[tuple[list[list[int]], tuple[int, int]]]:
 
     return data
 
-if __name__ == "__main__":
+def return_data() -> list[tuple[list[int], tuple[int, int]]]:
     try:
         data = read_dataset()
     except Exception:
-        data = generate_dataset(sample_size=10000)
-        write_dataset(data)
-    print(len(data))
+        inp = input("WARNING: Generating a dataset is slow. Do you really want to (y/N)? ")
+        if "y" in inp.lower():
+            data = generate_dataset(sample_size=10000)
+            write_dataset(data)
 
-
+    return data
